@@ -3,6 +3,19 @@
  * @module types
  */
 
+// Re-export course types from dedicated file
+export type {
+  CourseMeta,
+  StepCheckpoint,
+  CourseStep,
+  CourseResource,
+  CourseDefinition,
+  ProcessedStep,
+  ProcessedCourse,
+  CourseProgress,
+  CourseRecord,
+} from './course';
+
 // ============================================================================
 // API Types
 // ============================================================================
@@ -72,78 +85,9 @@ export interface SignupData {
 // ============================================================================
 
 /**
- * Course status
+ * Course status (deprecated - use CourseRecord from './course')
  */
 export type CourseStatus = 'draft' | 'processing' | 'ready' | 'published';
-
-/**
- * Course metadata
- */
-export interface CourseMeta {
-  title: string;
-  description: string;
-  author: string;
-  estimatedTime: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-}
-
-/**
- * Course checkpoint
- */
-export interface CourseCheckpoint {
-  label: string;
-  hint?: string;
-}
-
-/**
- * Course step
- */
-export interface CourseStep {
-  id: string;
-  title: string;
-  videoUrl: string;
-  videoTimestamp: string;
-  videoEndTimestamp?: string;
-  content: string;
-  estimatedTime: string;
-  checkpoint: CourseCheckpoint;
-}
-
-/**
- * Course resource
- */
-export interface CourseResource {
-  label: string;
-  url: string;
-}
-
-/**
- * Full course JSON structure (from course-creator CLI)
- */
-export interface CourseJSON {
-  meta: CourseMeta;
-  steps: CourseStep[];
-  resources?: CourseResource[];
-}
-
-/**
- * Course record stored in database
- */
-export interface Course {
-  id: string;
-  user_id: string;
-  title: string;
-  description?: string;
-  video_url: string;
-  transcript_key?: string;
-  course_json?: CourseJSON;
-  generated_html?: string;
-  zenbin_id?: string;
-  zenbin_url?: string;
-  status: CourseStatus;
-  created_at: string;
-  updated_at: string;
-}
 
 /**
  * Create course input

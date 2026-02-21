@@ -374,28 +374,31 @@ interface Course {
 
 ## Phase 3: Course Creation Core
 
-### Task 3.1: Create Course Type Definitions
+### Task 3.1: Create Course Type Definitions ✅ COMPLETE
 **Description**: TypeScript types for course data structure
 
 **Steps**:
-1. Define CourseMeta interface
-2. Define CourseStep interface
-3. Define CourseJSON interface
-4. Define CourseCheckpoint interface
-5. Create validation schemas
+1. Define CourseMeta interface ✅
+2. Define CourseStep interface ✅
+3. Define CourseDefinition interface ✅
+4. Define CourseCheckpoint interface ✅
+5. Create validation schemas ✅
 
 **Files**:
-- `src/types/course.ts`
-- `src/lib/course/validation.ts`
+- `src/types/course.ts` ✅
+- `src/lib/course/validation.ts` ✅
+- `tests/lib/course/validation.test.ts` (29 tests passing) ✅
 
 **Success Criteria**:
-- [ ] Types match course-creator CLI schema
-- [ ] Validation catches invalid data
-- [ ] Types exported for use in components
+- [x] Types match course-creator CLI schema
+- [x] Validation catches invalid data
+- [x] Types exported for use in components
 
 **Tests**:
-- Unit test: Valid course JSON passes validation
-- Unit test: Invalid course JSON fails validation
+- [x] Unit test: Valid course JSON passes validation
+- [x] Unit test: Invalid course JSON fails validation
+- [x] Unit test: Video URL validation works
+- [x] Unit test: Timestamp validation works
 
 ---
 

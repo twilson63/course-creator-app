@@ -493,31 +493,37 @@ interface Course {
 
 ---
 
-### Task 3.5: Implement Course Generation Pipeline
+### Task 3.5: Implement Course Generation Pipeline ✅ COMPLETE
 **Description**: End-to-end course creation flow
 
 **Steps**:
-1. Create course generation service
-2. Call LLM with transcript → get JSON
-3. Parse and validate JSON
-4. Call LLM with JSON → get HTML
-5. Save JSON and HTML to course record
-6. Update course status
+1. Create course generation service ✅
+2. Call LLM with transcript → get JSON ✅
+3. Parse and validate JSON ✅
+4. Call LLM with JSON → get HTML ✅
+5. Save JSON and HTML to course record ✅
+6. Update course status ✅
 
 **Files**:
-- `src/lib/course/generator.ts`
-- `src/lib/course/pipeline.ts`
+- `src/lib/course/generator.ts` ✅
+- `src/lib/course/pipeline.ts` ✅
+- `tests/lib/course/generator.test.ts` (8 tests passing) ✅
+- `tests/lib/course/pipeline.test.ts` (11 tests passing) ✅
 
 **Success Criteria**:
-- [ ] Pipeline processes transcript end-to-end
-- [ ] JSON validated before HTML generation
-- [ ] Course status updated during processing
-- [ ] Errors show user-friendly messages
+- [x] Pipeline processes transcript end-to-end
+- [x] JSON validated before HTML generation
+- [x] Course status updated during processing
+- [x] Errors show user-friendly messages
+- [x] Pipeline tracks status through stages
 
 **Tests**:
-- Integration test: Full pipeline completes
-- Unit test: JSON parsing handles errors
-- Unit test: Status updates correctly
+- [x] Unit test: Generator generates JSON from transcript
+- [x] Unit test: Generator generates HTML from JSON
+- [x] Unit test: Generator refines course from prompt
+- [x] Unit test: Pipeline runs end-to-end
+- [x] Unit test: Pipeline tracks status changes
+- [x] Unit test: PipelineError includes stage information
 
 ---
 
@@ -956,16 +962,16 @@ For each task, complete in this order:
 |-------|-------|-----------|--------|
 | 1. Project Setup | 4 | 3 | 🔄 In Progress |
 | 2. Authentication | 6 | 6 | ✅ Complete |
-| 3. Course Creation | 5 | 4 | 🔄 In Progress |
+| 3. Course Creation | 5 | 5 | ✅ Complete |
 | 4. Edit Studio | 4 | 0 | Not Started |
 | 5. Publishing | 2 | 0 | Not Started |
 | 6. Dashboard | 3 | 0 | Not Started |
 | 7. Polish & Docs | 5 | 0 | Not Started |
 | 8. Deployment | 2 | 0 | Not Started |
 
-**Total Tasks: 31 | Completed: 13**
+**Total Tasks: 31 | Completed: 14**
 
-### Current Task: 3.5 - Implement Course Generation Pipeline
+### Current Task: 4.1 - Build Edit Studio Layout
 
 ---
 

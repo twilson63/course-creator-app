@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  // Configure for OnHyper app path
+  basePath: '/a/course-creator-30c2a685',
 };
 
 export default nextConfig;

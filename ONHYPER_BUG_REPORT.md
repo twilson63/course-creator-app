@@ -117,6 +117,41 @@ This causes relative paths (`./static/`) to resolve incorrectly:
 
 ---
 
+## Additional Testing (2026-02-21 14:49 EST)
+
+### Issue 4: `_next` Directory Filtered During Upload
+
+When uploading ZIP with `_next/` directory:
+```
+ZIP file: 63 files including _next/static/chunks/*.js
+API response: "files_count": 14 (missing all _next files)
+```
+
+**Result:** All `_next/*` files are silently filtered/ignored during ZIP processing.
+
+### Issue 5: basePath Configuration Still Broken
+
+Even with Next.js `basePath: '/a/course-creator-30c2a685'`:
+- HTML correctly references `/a/course-creator-30c2a685/_next/static/*.js`
+- Files still return 404 because they weren't stored
+- Browser shows "Loading..." indefinitely
+- `window.__NEXT_DATA__` is undefined (React never initializes)
+
+### Test Results
+
+| Path | Expected | Actual |
+|------|----------|--------|
+| `/a/slug/_next/static/chunks/file.js` | JS file | 404 JSON |
+| `/a/slug/static/chunks/file.js` | JS file | 404 JSON |
+| `/static/chunks/file.js` | JS file | HTML from OnHyper site |
+| `/files/slug/static/chunks/file.js` | JS file | HTML (wrong content-type) |
+
+### Root Cause
+
+The ZIP upload API is **filtering out** directories starting with `_` and **not serving** any static files at their expected paths.
+
+---
+
 ## Test Case
 
 A complete reproduction repository is available:

@@ -5,7 +5,7 @@
  */
 
 export { LLMClient, llmClient, LLMError, LLMRateLimitError } from './client';
-export type { default as LLMConfig } from './client';
+export type { LLMConfig } from './client';
 export {
   TRANSCRIPT_TO_JSON_PROMPT,
   JSON_TO_HTML_PROMPT,

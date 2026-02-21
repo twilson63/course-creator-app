@@ -17,7 +17,7 @@ import {
 /**
  * LLM API configuration
  */
-interface LLMConfig {
+export interface LLMConfig {
   /** API base URL */
   baseUrl: string;
   /** API key */

@@ -172,8 +172,9 @@ export function applyChanges(
 
   for (const change of changes) {
     if (change.type === 'meta' && change.field) {
-      // Apply meta changes
-      (result.meta as Record<string, unknown>)[change.field] = change.newValue;
+      // Apply meta changes - use unknown intermediate cast for safety
+      const meta = result.meta as unknown as Record<string, unknown>;
+      meta[change.field] = change.newValue;
     } else if (change.type === 'step') {
       if (change.action === 'added') {
         // Find the step in modified version (this is a simplified implementation)
@@ -189,7 +190,8 @@ export function applyChanges(
       } else if (change.action === 'modified' && change.field) {
         const step = result.steps.find((s) => s.id === change.stepId);
         if (step) {
-          (step as Record<string, unknown>)[change.field] = change.newValue;
+          const stepRecord = step as unknown as Record<string, unknown>;
+          stepRecord[change.field] = change.newValue;
         }
       }
     } else if (change.type === 'resource') {

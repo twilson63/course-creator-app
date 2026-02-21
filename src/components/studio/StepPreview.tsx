@@ -9,6 +9,7 @@
 
 'use client';
 
+import type { ReactElement } from 'react';
 import type { CourseStep } from '@/types/course';
 import { VideoPreview } from './VideoPreview';
 
@@ -23,7 +24,7 @@ export interface StepPreviewProps {
  * Render markdown content as paragraphs
  * (Simple implementation - can be enhanced with a proper markdown library)
  */
-function renderMarkdown(content: string): JSX.Element[] {
+function renderMarkdown(content: string): ReactElement[] {
   const paragraphs = content.split(/\n\n+/).filter(Boolean);
 
   return paragraphs.map((paragraph, index) => (

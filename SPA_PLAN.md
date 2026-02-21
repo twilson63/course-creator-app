@@ -3,16 +3,14 @@
 ## Goal
 Convert the Next.js app to a static SPA deployable to onhyper.io, with API backend on hyper-micro.
 
-## Status: Phase 3 Blocked ⚠️
+## Status: COMPLETE ✅
 
-Phase 1 and 2 are complete. However, **Phase 3 (Static Export)** has a limitation:
+All phases complete! The app is now live at: **https://onhyper.io/a/course-creator-30c2a685**
 
-**Problem**: Next.js generates multiple JS chunks with relative paths (`/_next/static/...`). onhyper.io's app hosting expects a single HTML/CSS/JS file, not a multi-file static site.
-
-**Solutions**:
-1. **Vercel Deployment** ✅ Recommended - Full Next.js support, dynamic routes work
-2. **Single-File Bundle** - Use parcel/rollup to create a single HTML file (needs refactoring)
-3. **Hyper-Micro Storage** - Upload `/out` folder to storage bucket (needs URL rewriting)
+**Deployment Method**: ZIP upload via `POST /api/apps/:id/zip`
+- 63 files uploaded successfully
+- Next.js static export with pushstate routing
+- Client-side routing works on subdomain URLs
 
 ---
 
@@ -68,10 +66,23 @@ Phase 1 and 2 are complete. However, **Phase 3 (Static Export)** has a limitatio
 - [x] Remove Next.js API routes
 - [x] Configure static export
 
-### Phase 4: Deployment ⏳ IN PROGRESS
+### Phase 4: Deployment ✅ COMPLETE
 - [x] Build static export (`npm run build` → `/out`)
-- [ ] Upload to hosting platform
-- [ ] Test all functionality
+- [x] Create ZIP of output directory
+- [x] Upload via `POST /api/apps/:id/zip` endpoint
+- [x] Test all functionality
+
+## Deployment Details
+
+**ZIP Upload**:
+```bash
+cd out && zip -r ../course-creator.zip . && cd ..
+curl -X POST https://onhyper.io/api/apps/{app_id}/zip \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@course-creator.zip"
+```
+
+**Result**: 63 files uploaded, app live at https://onhyper.io/a/course-creator-30c2a685
 
 ## Files Created
 
@@ -101,18 +112,14 @@ npm run build → out/
 └── favicon.ico
 ```
 
-## Next Steps
+## Completed! 🎉
 
-1. **Deploy to Vercel** (easiest):
-   ```bash
-   npm i -g vercel
-   vercel
-   ```
+The Course Creator app is now deployed to onhyper.io via ZIP upload. This is the recommended deployment method for Next.js static exports on onhyper.io.
 
-2. **Or update onhyper.io deployment** to support multi-file static sites
+**Live URL**: https://onhyper.io/a/course-creator-30c2a685
 
 ## Estimated Effort
 - Phase 1: ✅ Done
 - Phase 2: ✅ Done
 - Phase 3: ✅ Done
-- Phase 4: ~1 hour (hosting dependent)
+- Phase 4: ✅ Done (Total time: ~2 hours)

@@ -26,3 +26,6 @@ export type { PromptInputProps } from './PromptInput';
 
 export { DiffPreview } from './DiffPreview';
 export type { DiffPreviewProps } from './DiffPreview';
+
+export { CourseJSONViewer } from './CourseJSONViewer';
+export type { CourseJSONViewerProps } from './CourseJSONViewer';

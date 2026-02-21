@@ -621,27 +621,31 @@ interface Course {
 
 ---
 
-### Task 4.4: Build Course JSON Viewer
+### Task 4.4: Build Course JSON Viewer ✅ COMPLETE
 **Description**: View course structure and metadata
 
 **Steps**:
-1. Create CourseJSONViewer component
-2. Display meta section
-3. Display steps list with titles
-4. Display resources list
-5. Add copy-to-clipboard
+1. Create CourseJSONViewer component ✅
+2. Display meta section ✅
+3. Display steps list with titles ✅
+4. Display resources list ✅
+5. Add copy-to-clipboard ✅
 
 **Files**:
-- `src/components/studio/CourseJSONViewer.tsx`
+- `src/components/studio/CourseJSONViewer.tsx` ✅
+- `tests/components/studio/CourseJSONViewer.test.tsx` (17 tests passing) ✅
 
 **Success Criteria**:
-- [ ] JSON displayed in readable format
-- [ ] Collapsible sections
-- [ ] Copy button works
+- [x] JSON displayed in readable format
+- [x] Collapsible sections (meta, steps, resources)
+- [x] Copy button works with success feedback
+- [x] Toggle between structured and raw JSON view
 
 **Tests**:
-- Unit test: JSON renders correctly
-- Unit test: Copy to clipboard works
+- [x] Unit test: JSON renders correctly
+- [x] Unit test: Collapsible sections work
+- [x] Unit test: Copy to clipboard works
+- [x] Unit test: Raw JSON toggle works
 
 ---
 
@@ -972,15 +976,15 @@ For each task, complete in this order:
 | 1. Project Setup | 4 | 3 | 🔄 In Progress |
 | 2. Authentication | 6 | 6 | ✅ Complete |
 | 3. Course Creation | 5 | 5 | ✅ Complete |
-| 4. Edit Studio | 4 | 3 | 🔄 In Progress |
+| 4. Edit Studio | 4 | 4 | ✅ Complete |
 | 5. Publishing | 2 | 0 | Not Started |
 | 6. Dashboard | 3 | 0 | Not Started |
 | 7. Polish & Docs | 5 | 0 | Not Started |
 | 8. Deployment | 2 | 0 | Not Started |
 
-**Total Tasks: 31 | Completed: 17**
+**Total Tasks: 31 | Completed: 18**
 
-### Current Task: 4.4 - Build Course JSON Viewer
+### Current Task: 5.1 - Implement ZenBin Publishing
 
 ---
 

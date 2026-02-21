@@ -152,6 +152,43 @@ The ZIP upload API is **filtering out** directories starting with `_` and **not 
 
 ---
 
+## Update: Static Files Fixed (2026-02-21 14:51 EST)
+
+Static files are now being served at `/a/{slug}/static/*`! ✅
+
+**New Issue: Nested HTML Structure**
+
+OnHyper wraps uploaded HTML in an outer HTML document:
+
+```
+<!DOCTYPE html>           ← OnHyper wrapper
+<html>
+  <head>...</head>
+  <body>
+    <!DOCTYPE html>       ← Our HTML (nested inside!)
+    <html>
+      <head>...</head>
+      <body>
+        <div>Loading...</div>
+        <script src="..."></script>
+      </body>
+    </html>
+  </body>
+</html>
+```
+
+**Impact:** 
+- Invalid HTML structure (nested DOCTYPE/html/body)
+- Scripts don't execute properly
+- React/Next.js fails to initialize
+- Page stuck on "Loading..."
+
+**Workaround Needed:**
+- OnHyper should NOT wrap HTML that already has a `<!DOCTYPE html>` declaration
+- Or extract only `<body>` content from uploaded HTML
+
+---
+
 ## Test Case
 
 A complete reproduction repository is available:

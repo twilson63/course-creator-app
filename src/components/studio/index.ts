@@ -14,3 +14,9 @@ export type { SidebarProps } from './Sidebar';
 
 export { StepList } from './StepList';
 export type { StepListProps } from './StepList';
+
+export { StepPreview } from './StepPreview';
+export type { StepPreviewProps } from './StepPreview';
+
+export { VideoPreview } from './VideoPreview';
+export type { VideoPreviewProps } from './VideoPreview';

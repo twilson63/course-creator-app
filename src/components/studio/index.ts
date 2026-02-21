@@ -20,3 +20,9 @@ export type { StepPreviewProps } from './StepPreview';
 
 export { VideoPreview } from './VideoPreview';
 export type { VideoPreviewProps } from './VideoPreview';
+
+export { PromptInput } from './PromptInput';
+export type { PromptInputProps } from './PromptInput';
+
+export { DiffPreview } from './DiffPreview';
+export type { DiffPreviewProps } from './DiffPreview';

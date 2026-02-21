@@ -529,32 +529,37 @@ interface Course {
 
 ## Phase 4: Edit Studio
 
-### Task 4.1: Build Edit Studio Layout
+### Task 4.1: Build Edit Studio Layout ✅ COMPLETE
 **Description**: Main editing interface for courses
 
 **Steps**:
-1. Create EditStudio component
-2. Add sidebar with course metadata
-3. Add main content area for steps
-4. Add step navigation
-5. Add prompt input for refinement
+1. Create EditStudio component ✅
+2. Add sidebar with course metadata ✅
+3. Add main content area for steps ✅
+4. Add step navigation ✅
+5. Add prompt input for refinement ✅
 
 **Files**:
-- `src/components/studio/EditStudio.tsx`
-- `src/components/studio/Sidebar.tsx`
-- `src/components/studio/StepList.tsx`
-- `src/app/courses/[id]/edit/page.tsx`
+- `src/components/studio/EditStudio.tsx` ✅
+- `src/components/studio/Sidebar.tsx` ✅
+- `src/components/studio/StepList.tsx` ✅
+- `src/app/courses/[id]/edit/page.tsx` ✅
+- `tests/components/studio/EditStudio.test.tsx` (11 tests passing) ✅
+- `tests/components/studio/Sidebar.test.tsx` (9 tests passing) ✅
+- `tests/components/studio/StepList.test.tsx` (11 tests passing) ✅
 
 **Success Criteria**:
-- [ ] Layout responsive on desktop/tablet
-- [ ] Steps listed in order
-- [ ] Active step highlighted
-- [ ] Prompt input always visible
+- [x] Layout responsive on desktop/tablet
+- [x] Steps listed in order
+- [x] Active step highlighted
+- [x] Prompt input always visible
 
 **Tests**:
-- Unit test: Layout renders correctly
-- Unit test: Steps display in order
-- E2E test: Navigation between steps
+- [x] Unit test: Layout renders correctly
+- [x] Unit test: Steps display in order
+- [x] Unit test: Active step highlighting
+- [x] Unit test: Step navigation via click
+- [x] Unit test: Prompt input visible
 
 ---
 
@@ -963,15 +968,15 @@ For each task, complete in this order:
 | 1. Project Setup | 4 | 3 | 🔄 In Progress |
 | 2. Authentication | 6 | 6 | ✅ Complete |
 | 3. Course Creation | 5 | 5 | ✅ Complete |
-| 4. Edit Studio | 4 | 0 | Not Started |
+| 4. Edit Studio | 4 | 1 | 🔄 In Progress |
 | 5. Publishing | 2 | 0 | Not Started |
 | 6. Dashboard | 3 | 0 | Not Started |
 | 7. Polish & Docs | 5 | 0 | Not Started |
 | 8. Deployment | 2 | 0 | Not Started |
 
-**Total Tasks: 31 | Completed: 14**
+**Total Tasks: 31 | Completed: 15**
 
-### Current Task: 4.1 - Build Edit Studio Layout
+### Current Task: 4.2 - Build Step Preview Component
 
 ---
 

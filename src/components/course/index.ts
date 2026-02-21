@@ -6,3 +6,5 @@
 
 export { CourseForm } from './CourseForm';
 export type { CourseFormData } from './CourseForm';
+
+export { TranscriptUpload } from './TranscriptUpload';

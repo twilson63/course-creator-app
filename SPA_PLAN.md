@@ -3,6 +3,19 @@
 ## Goal
 Convert the Next.js app to a static SPA deployable to onhyper.io, with API backend on hyper-micro.
 
+## Status: Phase 3 Blocked ⚠️
+
+Phase 1 and 2 are complete. However, **Phase 3 (Static Export)** has a limitation:
+
+**Problem**: Next.js generates multiple JS chunks with relative paths (`/_next/static/...`). onhyper.io's app hosting expects a single HTML/CSS/JS file, not a multi-file static site.
+
+**Solutions**:
+1. **Vercel Deployment** ✅ Recommended - Full Next.js support, dynamic routes work
+2. **Single-File Bundle** - Use parcel/rollup to create a single HTML file (needs refactoring)
+3. **Hyper-Micro Storage** - Upload `/out` folder to storage bucket (needs URL rewriting)
+
+---
+
 ## Architecture
 
 ```
@@ -20,9 +33,10 @@ Convert the Next.js app to a static SPA deployable to onhyper.io, with API backe
 ┌─────────────────────────────────────────────────────────────┐
 │                 hyper-micro (API Backend)                   │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │  Database: users                                    │   │
-│  │  Database: courses                                  │   │
-│  │  Database: sessions                                 │   │
+│  │  Database: users ✅                                  │   │
+│  │  Database: courses ✅                                │   │
+│  │  Database: sessions ✅                               │   │
+│  │  Storage: course-creator ✅ (for static files)       │   │
 │  │                                                      │   │
 │  │  POST /api/dbs/:db/docs - Create document           │   │
 │  │  GET /api/dbs/:db/docs/:id - Get document           │   │
@@ -33,58 +47,72 @@ Convert the Next.js app to a static SPA deployable to onhyper.io, with API backe
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Tasks
+## Completed Tasks
 
-### Phase 1: Setup Hyper-Micro Databases ✅ IN PROGRESS
+### Phase 1: Setup Hyper-Micro Databases ✅ COMPLETE
 - [x] Understand hyper-micro API structure
-- [ ] Create `users` database
-- [ ] Create `courses` database
-- [ ] Create `sessions` database
-- [ ] Test CRUD operations
+- [x] Create `users` database
+- [x] Create `courses` database
+- [x] Create `sessions` database
+- [x] Create `course-creator` storage bucket
 
-### Phase 2: Update API Client
-- [ ] Create new hyper-micro client
-- [ ] Update auth to use hyper-micro
-- [ ] Update courses to use hyper-micro
-- [ ] Keep LLM calls to onhyper.io proxy
+### Phase 2: Update API Client ✅ COMPLETE
+- [x] Create new hyper-micro client (`src/lib/api/hyper-micro.ts`)
+- [x] Create course service (`src/lib/services/course-service.ts`)
+- [x] Create user service (`src/lib/services/user-service.ts`)
+- [x] Create session service (`src/lib/services/session-service.ts`)
 
-### Phase 3: Client-Side Routing
-- [ ] Replace `/courses/[id]/edit` with `/edit?id=xxx`
-- [ ] Add client-side router hook
-- [ ] Convert pages to client components
-- [ ] Remove Next.js API routes
+### Phase 3: Client-Side Routing ✅ COMPLETE
+- [x] Replace `/courses/[id]/edit` with `/edit?id=xxx`
+- [x] Convert page to client component
+- [x] Remove Next.js API routes
+- [x] Configure static export
 
-### Phase 4: Static Export & Deploy
-- [ ] Configure next.config.ts for export
-- [ ] Build static export
-- [ ] Upload to onhyper.io
+### Phase 4: Deployment ⏳ IN PROGRESS
+- [x] Build static export (`npm run build` → `/out`)
+- [ ] Upload to hosting platform
 - [ ] Test all functionality
 
-## Hyper-Micro API Pattern
+## Files Created
 
-```typescript
-// Create document
-POST /api/dbs/courses/docs
-{ "key": "course-123", "value": { title: "...", ... } }
+- `src/lib/api/hyper-micro.ts` - Hyper-micro API client
+- `src/lib/services/course-service.ts` - Course CRUD
+- `src/lib/services/user-service.ts` - Auth/user management
+- `src/lib/services/session-service.ts` - Session management
+- `src/lib/services/index.ts` - Exports
+- `src/app/edit/page.tsx` - Client-side edit page
+- `src/app/not-found.tsx` - 404 page for SPA routing
 
-// Get document
-GET /api/dbs/courses/docs/course-123
+## Files Removed
 
-// Update document
-PUT /api/dbs/courses/docs/course-123
-{ "value": { title: "...", ... } }
+- `src/app/api/health/route.ts` - Server-side API route
+- `src/app/courses/[id]/edit/page.tsx` - Dynamic route
 
-// Delete document
-DELETE /api/dbs/courses/docs/course-123
+## Build Output
 
-// List documents
-GET /api/dbs/courses/docs
+```
+npm run build → out/
+├── index.html
+├── dashboard/index.html
+├── edit/index.html
+├── 404.html
+├── _next/static/chunks/*.js  (multiple JS files)
+├── _next/static/chunks/*.css
+└── favicon.ico
 ```
 
-## Estimated Effort
-- Phase 1: 1 hour
-- Phase 2: 2 hours
-- Phase 3: 2 hours
-- Phase 4: 1 hour
+## Next Steps
 
-**Total: 6 hours**
+1. **Deploy to Vercel** (easiest):
+   ```bash
+   npm i -g vercel
+   vercel
+   ```
+
+2. **Or update onhyper.io deployment** to support multi-file static sites
+
+## Estimated Effort
+- Phase 1: ✅ Done
+- Phase 2: ✅ Done
+- Phase 3: ✅ Done
+- Phase 4: ~1 hour (hosting dependent)

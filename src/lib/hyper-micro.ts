@@ -9,16 +9,63 @@
  */
 
 import { ApiResponse, HyperDocument } from '@/types';
+import { isProxyBaseUrl, withOnHyperHeaders } from '@/lib/onhyper-proxy';
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function normalizeDocumentPayload<T>(payload: unknown): HyperDocument<T> {
+  if (isObject(payload) && 'key' in payload && 'value' in payload) {
+    return payload as unknown as HyperDocument<T>;
+  }
+
+  if (isObject(payload) && 'doc' in payload && isObject(payload.doc) && 'key' in payload.doc && 'value' in payload.doc) {
+    return payload.doc as unknown as HyperDocument<T>;
+  }
+
+  return payload as unknown as HyperDocument<T>;
+}
+
+function normalizeGetPayload<T>(payload: unknown): T {
+  if (isObject(payload) && 'value' in payload) {
+    return payload.value as T;
+  }
+
+  if (isObject(payload) && 'doc' in payload && isObject(payload.doc) && 'value' in payload.doc) {
+    return payload.doc.value as T;
+  }
+
+  return payload as T;
+}
+
+function normalizeListPayload<T>(payload: unknown): HyperDocument<T>[] {
+  if (Array.isArray(payload)) {
+    return payload as HyperDocument<T>[];
+  }
+
+  if (isObject(payload) && Array.isArray(payload.docs)) {
+    return payload.docs as HyperDocument<T>[];
+  }
+
+  if (isObject(payload) && Array.isArray(payload.data)) {
+    return payload.data as HyperDocument<T>[];
+  }
+
+  return [];
+}
 
 // ============================================================================
 // Configuration
 // ============================================================================
 
-const HYPER_MICRO_URL = process.env.NEXT_PUBLIC_HYPER_MICRO_URL || '';
+const HYPER_MICRO_URL = process.env.NEXT_PUBLIC_HYPER_MICRO_URL || '/proxy/hyper-micro';
 const HYPER_MICRO_KEY = process.env.NEXT_PUBLIC_HYPER_MICRO_KEY || '';
 
 if (!HYPER_MICRO_URL || !HYPER_MICRO_KEY) {
-  console.warn('Hyper-Micro configuration missing. Set NEXT_PUBLIC_HYPER_MICRO_URL and NEXT_PUBLIC_HYPER_MICRO_KEY');
+  if (!isProxyBaseUrl(HYPER_MICRO_URL)) {
+    console.warn('Hyper-Micro configuration missing. Set NEXT_PUBLIC_HYPER_MICRO_URL and NEXT_PUBLIC_HYPER_MICRO_KEY');
+  }
 }
 
 // ============================================================================
@@ -39,16 +86,26 @@ async function request<T>(
   const url = `${HYPER_MICRO_URL}${path}`;
 
   try {
+    const headers = withOnHyperHeaders(
+      {
+        'Content-Type': 'application/json',
+      },
+      HYPER_MICRO_URL
+    );
+
+    if (HYPER_MICRO_KEY && !isProxyBaseUrl(HYPER_MICRO_URL)) {
+      headers.Authorization = `Bearer ${HYPER_MICRO_KEY}`;
+    }
+
     const response = await fetch(url, {
       ...options,
       headers: {
-        'Authorization': `Bearer ${HYPER_MICRO_KEY}`,
-        'Content-Type': 'application/json',
+        ...headers,
         ...options.headers,
       },
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => null);
 
     if (!response.ok) {
       return {
@@ -106,7 +163,32 @@ export const dataApi = {
    * @returns List of database names
    */
   async listDatabases(): Promise<ApiResponse<string[]>> {
-    return request<string[]>('/api/dbs');
+    const result = await request<string[] | { databases?: string[]; data?: string[] }>('/api/dbs');
+    if (!result.ok) {
+      return {
+        ok: false,
+        status: result.status,
+        error: result.error,
+      };
+    }
+
+    const payload = result.data;
+    if (Array.isArray(payload)) {
+      return result as ApiResponse<string[]>;
+    }
+
+    if (isObject(payload)) {
+      return {
+        ...result,
+        data: Array.isArray(payload.databases)
+          ? payload.databases
+          : Array.isArray(payload.data)
+          ? payload.data
+          : [],
+      };
+    }
+
+    return { ...result, data: [] };
   },
 
   /**
@@ -118,10 +200,19 @@ export const dataApi = {
    * @returns Created document
    */
   async createDocument<T>(db: string, key: string, value: T): Promise<ApiResponse<HyperDocument<T>>> {
-    return request<HyperDocument<T>>(`/api/dbs/${db}/docs`, {
+    const result = await request<HyperDocument<T>>(`/api/dbs/${db}/docs`, {
       method: 'POST',
       body: JSON.stringify({ key, value }),
     });
+
+    if (!result.ok) {
+      return result;
+    }
+
+    return {
+      ...result,
+      data: normalizeDocumentPayload<T>(result.data),
+    };
   },
 
   /**
@@ -132,7 +223,15 @@ export const dataApi = {
    * @returns Document value
    */
   async getDocument<T>(db: string, key: string): Promise<ApiResponse<T>> {
-    return request<T>(`/api/dbs/${db}/docs/${encodeURIComponent(key)}`);
+    const result = await request<T>(`/api/dbs/${db}/docs/${encodeURIComponent(key)}`);
+    if (!result.ok) {
+      return result;
+    }
+
+    return {
+      ...result,
+      data: normalizeGetPayload<T>(result.data),
+    };
   },
 
   /**
@@ -144,10 +243,19 @@ export const dataApi = {
    * @returns Updated document
    */
   async updateDocument<T>(db: string, key: string, value: T): Promise<ApiResponse<HyperDocument<T>>> {
-    return request<HyperDocument<T>>(`/api/dbs/${db}/docs/${encodeURIComponent(key)}`, {
+    const result = await request<HyperDocument<T>>(`/api/dbs/${db}/docs/${encodeURIComponent(key)}`, {
       method: 'PUT',
       body: JSON.stringify({ value }),
     });
+
+    if (!result.ok) {
+      return result;
+    }
+
+    return {
+      ...result,
+      data: normalizeDocumentPayload<T>(result.data),
+    };
   },
 
   /**
@@ -170,7 +278,15 @@ export const dataApi = {
    * @returns List of documents
    */
   async listDocuments<T>(db: string): Promise<ApiResponse<HyperDocument<T>[]>> {
-    return request<HyperDocument<T>[]>(`/api/dbs/${db}/docs`);
+    const result = await request<HyperDocument<T>[]>(`/api/dbs/${db}/docs`);
+    if (!result.ok) {
+      return result;
+    }
+
+    return {
+      ...result,
+      data: normalizeListPayload<T>(result.data),
+    };
   },
 };
 
@@ -229,12 +345,20 @@ export const storageApi = {
     const url = `${HYPER_MICRO_URL}/api/storage/${bucket}/${encodeURIComponent(key)}`;
 
     try {
-      const response = await fetch(url, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${HYPER_MICRO_KEY}`,
+      const headers = withOnHyperHeaders(
+        {
           'Content-Type': contentType,
         },
+        HYPER_MICRO_URL
+      );
+
+      if (HYPER_MICRO_KEY && !isProxyBaseUrl(HYPER_MICRO_URL)) {
+        headers.Authorization = `Bearer ${HYPER_MICRO_KEY}`;
+      }
+
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers,
         body: content,
       });
 
@@ -268,10 +392,13 @@ export const storageApi = {
     const url = `${HYPER_MICRO_URL}/api/storage/${bucket}/${encodeURIComponent(key)}`;
 
     try {
+      const headers = withOnHyperHeaders({}, HYPER_MICRO_URL);
+      if (HYPER_MICRO_KEY && !isProxyBaseUrl(HYPER_MICRO_URL)) {
+        headers.Authorization = `Bearer ${HYPER_MICRO_KEY}`;
+      }
+
       const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${HYPER_MICRO_KEY}`,
-        },
+        headers,
       });
 
       if (!response.ok) {

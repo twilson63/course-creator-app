@@ -34,11 +34,13 @@ A multi-tenant web application that converts video transcripts into interactive 
 npm install
 
 # Set up environment
-cp .env.example .env.local
-# Edit .env.local with your API keys
+# Create .env.local (see env template below)
 
-# Start development server
+# Start Next.js dev server
 npm run dev
+
+# OR build static app + run local OnHyper emulation
+npm run dev:full
 
 # Run tests
 npm test
@@ -50,17 +52,57 @@ npm run build
 ## Environment Variables
 
 ```env
-# Hyper Micro Backend
-NEXT_PUBLIC_HYPER_MICRO_URL=http://localhost:6363
+# Optional: explicit app slug header for proxy calls.
+# If omitted, slug is derived from /a/{slug} URL at runtime.
+NEXT_PUBLIC_ONHYPER_APP_SLUG=course-creator-30c2a685
 
-# LLM API
-LLM_API_URL=https://api.openai.com/v1
-LLM_API_KEY=your-api-key
-LLM_MODEL=gpt-4
+# Optional overrides for local direct APIs (defaults use /proxy/*).
+NEXT_PUBLIC_HYPER_MICRO_URL=/proxy/hyper-micro
+NEXT_PUBLIC_LLM_API_URL=/proxy/openai/v1
 
-# ZenBin Publishing
-NEXT_PUBLIC_ZENBIN_URL=https://zenbin.io
+# Optional direct API credentials (not needed when using /proxy/*)
+NEXT_PUBLIC_HYPER_MICRO_KEY=
+NEXT_PUBLIC_LLM_API_KEY=
+
+# LLM tuning
+NEXT_PUBLIC_LLM_MODEL=gpt-4
+NEXT_PUBLIC_LLM_MAX_RETRIES=3
+NEXT_PUBLIC_LLM_TIMEOUT=120000
+
+# Publish destination
+NEXT_PUBLIC_ZENBIN_URL=https://zenbin.org
+
+# Local OnHyper emulation server settings
+ONHYPER_APP_SLUG=course-creator-30c2a685
+HYPER_MICRO_TARGET=http://localhost:6363
+HYPER_MICRO_API_KEY=
+
+# OpenAI behavior for local /proxy/openai route
+# mock (default) or passthrough
+OPENAI_PROXY_MODE=mock
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_API_KEY=
 ```
+
+## Local OnHyper Emulation
+
+Use this to run static assets and emulate OnHyper proxy behavior locally.
+
+1. Build static output: `npm run build:static`
+2. Start local server: `npm run serve:local`
+3. Open `http://localhost:4173/a/course-creator-30c2a685`
+
+Supported local proxy routes:
+
+- `POST /proxy/openai/v1/chat/completions` (mocked response by default)
+- `/proxy/hyper-micro/*` (forwarded to `HYPER_MICRO_TARGET`)
+
+To use real OpenAI in local proxy mode, set:
+
+- `OPENAI_PROXY_MODE=passthrough`
+- `OPENAI_API_KEY=<your_key>`
+
+The local proxy enforces `X-App-Slug` and checks it against `ONHYPER_APP_SLUG`.
 
 ## Project Structure
 

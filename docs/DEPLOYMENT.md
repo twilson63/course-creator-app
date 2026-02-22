@@ -21,7 +21,7 @@ LLM_API_KEY=sk-your-api-key
 LLM_MODEL=gpt-4
 
 # ZenBin Publishing
-NEXT_PUBLIC_ZENBIN_URL=https://zenbin.io
+NEXT_PUBLIC_ZENBIN_URL=https://zenbin.org
 
 # App URL
 NEXT_PUBLIC_APP_URL=https://your-app.onhyper.io

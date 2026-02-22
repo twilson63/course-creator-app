@@ -8,6 +8,7 @@
  */
 
 import type { CourseDefinition } from '@/types/course';
+import { isProxyBaseUrl, withOnHyperHeaders } from '@/lib/onhyper-proxy';
 import {
   getTranscriptPrompts,
   getHtmlPrompts,
@@ -118,13 +119,20 @@ export class LLMClient {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+      const headers = withOnHyperHeaders(
+        {
+          'Content-Type': 'application/json',
+        },
+        this.baseUrl
+      );
+
+      if (this.apiKey && !isProxyBaseUrl(this.baseUrl)) {
+        headers.Authorization = `Bearer ${this.apiKey}`;
+      }
 
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.apiKey}`,
-        },
+        headers,
         body: JSON.stringify({
           model: this.model,
           messages: [
@@ -264,7 +272,7 @@ export class LLMClient {
  * Uses environment variables for configuration
  */
 export const llmClient = new LLMClient(
-  process.env.NEXT_PUBLIC_LLM_API_URL || 'https://api.openai.com/v1',
+  process.env.NEXT_PUBLIC_LLM_API_URL || '/proxy/openai/v1',
   process.env.NEXT_PUBLIC_LLM_API_KEY || '',
   {
     model: process.env.NEXT_PUBLIC_LLM_MODEL,

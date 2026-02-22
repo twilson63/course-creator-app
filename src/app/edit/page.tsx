@@ -9,11 +9,16 @@
 
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useCallback } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { EditStudio } from '@/components/studio';
-import { dataApi } from '@/lib/hyper-micro';
-import type { CourseDefinition } from '@/types/course';
+import { loadCourseRecord, updateCourseRecord } from '@/lib/course/record-service';
+import type {
+  CourseDefinition,
+  CourseRecord,
+  PublishHistoryEntry,
+} from '@/types/course';
 
 /**
  * Loading fallback component
@@ -57,7 +62,12 @@ function EditContent() {
   const searchParams = useSearchParams();
   const courseId = searchParams.get('id');
   const [course, setCourse] = useState<CourseDefinition | null>(null);
+  const [record, setRecord] = useState<CourseRecord | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [videoUrl, setVideoUrl] = useState('');
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -69,18 +79,11 @@ function EditContent() {
       }
 
       try {
-        const result = await dataApi.getDocument<{ definition: CourseDefinition }>(
-          'courses',
-          courseId
-        );
-
-        if (!result.ok || !result.data) {
-          setError('Course not found');
-          setLoading(false);
-          return;
-        }
-
-        setCourse(result.data.definition);
+        const result = await loadCourseRecord(courseId);
+        setRecord(result.record);
+        setCourse(result.definition);
+        setVideoUrl(result.record.video_url || '');
+        setLastSavedAt(result.record.updated_at);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load course');
       } finally {
@@ -91,6 +94,99 @@ function EditContent() {
     loadCourse();
   }, [courseId]);
 
+  const handleCourseUpdate = useCallback((nextCourse: CourseDefinition) => {
+    setCourse(nextCourse);
+    setSaveError(null);
+  }, []);
+
+  const handleSave = useCallback(async (courseOverride?: CourseDefinition) => {
+    const targetCourse = courseOverride ?? course;
+    if (!courseId || !record || !targetCourse || isSaving) {
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      const result = await updateCourseRecord({
+        courseId,
+        record,
+        definition: targetCourse,
+        title: targetCourse.meta.title,
+        description: targetCourse.meta.description,
+        videoUrl,
+      });
+
+      setRecord(result.record);
+      setCourse(result.definition);
+      setLastSavedAt(result.record.updated_at);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to save course');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [course, courseId, isSaving, record, videoUrl]);
+
+  const handlePublish = useCallback(
+    async (publishData: {
+      course: CourseDefinition;
+      generatedHtml: string;
+      zenbinId: string;
+      zenbinUrl: string;
+    }) => {
+      if (!courseId || !record || isSaving) {
+        return;
+      }
+
+      setIsSaving(true);
+      setSaveError(null);
+
+      try {
+        const definitionForPublish: CourseDefinition = {
+          ...publishData.course,
+          steps: publishData.course.steps.map((step) => ({
+            ...step,
+            videoUrl: step.videoUrl || videoUrl || undefined,
+          })),
+        };
+
+        const nextPublishHistory: PublishHistoryEntry[] = [
+          ...(record.publish_history ?? []),
+          {
+            zenbin_id: publishData.zenbinId,
+            zenbin_url: publishData.zenbinUrl,
+            published_at: new Date().toISOString(),
+          },
+        ];
+
+        const result = await updateCourseRecord({
+          courseId,
+          record,
+          definition: definitionForPublish,
+          title: definitionForPublish.meta.title,
+          description: definitionForPublish.meta.description,
+          videoUrl,
+          generatedHtml: publishData.generatedHtml,
+          zenbinId: publishData.zenbinId,
+          zenbinUrl: publishData.zenbinUrl,
+          publishHistory: nextPublishHistory,
+          status: 'published',
+        });
+
+        setRecord(result.record);
+        setCourse(result.definition);
+        setLastSavedAt(result.record.updated_at);
+      } catch (err) {
+        setSaveError(err instanceof Error ? err.message : 'Failed to persist published course');
+        throw err;
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [courseId, isSaving, record, videoUrl]
+  );
+
   if (loading) {
     return <LoadingFallback />;
   }
@@ -100,8 +196,29 @@ function EditContent() {
   }
 
   return (
-    <div className="h-screen">
-      <EditStudio course={course} />
+    <div className="h-screen relative">
+      <div className="absolute top-4 right-4 z-10">
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50"
+        >
+          <span aria-hidden="true">&larr;</span>
+          Back to Dashboard
+        </Link>
+      </div>
+      <EditStudio
+        course={course}
+        onCourseUpdate={handleCourseUpdate}
+        onSave={handleSave}
+        onPublish={handlePublish}
+        isSaving={isSaving}
+        saveError={saveError}
+        lastSavedAt={lastSavedAt}
+        courseVideoUrl={videoUrl}
+        onCourseVideoUrlChange={setVideoUrl}
+        publishedUrl={record?.zenbin_url ?? null}
+        publishHistory={record?.publish_history}
+      />
     </div>
   );
 }

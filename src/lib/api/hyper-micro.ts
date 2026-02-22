@@ -7,7 +7,34 @@
  */
 
 const API_KEY = process.env.NEXT_PUBLIC_HYPER_MICRO_KEY || '';
-const BASE_URL = process.env.NEXT_PUBLIC_HYPER_MICRO_URL || '';
+const BASE_URL = process.env.NEXT_PUBLIC_HYPER_MICRO_URL || '/proxy/hyper-micro';
+
+function isProxyBaseUrl(baseUrl: string): boolean {
+  return baseUrl.startsWith('/proxy/');
+}
+
+function resolveOnHyperAppSlug(): string | undefined {
+  const configuredSlug = process.env.NEXT_PUBLIC_ONHYPER_APP_SLUG;
+  if (configuredSlug) {
+    return configuredSlug;
+  }
+
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  const pathMatch = window.location.pathname.match(/\/a\/([^/]+)/);
+  if (pathMatch?.[1]) {
+    return pathMatch[1];
+  }
+
+  const host = window.location.hostname;
+  if (host.endsWith('.onhyper.io') && host !== 'onhyper.io') {
+    return host.replace(/\.onhyper\.io$/, '');
+  }
+
+  return undefined;
+}
 
 interface HyperMicroResponse<T> {
   ok: boolean;
@@ -36,13 +63,25 @@ export class HyperMicroClient {
     path: string,
     options: RequestInit = {}
   ): Promise<T> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options.headers as Record<string, string> | undefined),
+    };
+
+    if (this.apiKey && !isProxyBaseUrl(this.baseUrl)) {
+      headers.Authorization = `Bearer ${this.apiKey}`;
+    }
+
+    if (isProxyBaseUrl(this.baseUrl)) {
+      const appSlug = resolveOnHyperAppSlug();
+      if (appSlug) {
+        headers['X-App-Slug'] = appSlug;
+      }
+    }
+
     const response = await fetch(`${this.baseUrl}${path}`, {
       ...options,
-      headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
     });
 
     if (!response.ok) {
@@ -158,14 +197,26 @@ export class HyperMicroClient {
     file: File | Blob | ArrayBuffer,
     contentType?: string
   ): Promise<{ ok: boolean; key: string }> {
+    const headers: Record<string, string> = {
+      'Content-Type': contentType || 'application/octet-stream',
+    };
+
+    if (this.apiKey && !isProxyBaseUrl(this.baseUrl)) {
+      headers.Authorization = `Bearer ${this.apiKey}`;
+    }
+
+    if (isProxyBaseUrl(this.baseUrl)) {
+      const appSlug = resolveOnHyperAppSlug();
+      if (appSlug) {
+        headers['X-App-Slug'] = appSlug;
+      }
+    }
+
     const response = await fetch(
       `${this.baseUrl}/api/storage/${bucket}/${encodeURIComponent(key)}`,
       {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': contentType || 'application/octet-stream',
-        },
+        headers,
         body: file as BodyInit,
       }
     );
@@ -181,12 +232,23 @@ export class HyperMicroClient {
    * Download a file from storage
    */
   async downloadFile(bucket: string, key: string): Promise<Blob> {
+    const headers: Record<string, string> = {};
+
+    if (this.apiKey && !isProxyBaseUrl(this.baseUrl)) {
+      headers.Authorization = `Bearer ${this.apiKey}`;
+    }
+
+    if (isProxyBaseUrl(this.baseUrl)) {
+      const appSlug = resolveOnHyperAppSlug();
+      if (appSlug) {
+        headers['X-App-Slug'] = appSlug;
+      }
+    }
+
     const response = await fetch(
       `${this.baseUrl}/api/storage/${bucket}/${encodeURIComponent(key)}`,
       {
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-        },
+        headers,
       }
     );
 

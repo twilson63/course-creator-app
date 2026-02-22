@@ -5,7 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:static": "next build",
     "start": "next start",
+    "serve:local": "node scripts/local-onhyper-server.mjs",
+    "dev:onhyper-mock": "node scripts/local-onhyper-server.mjs",
+    "dev:full": "npm run build:static && npm run serve:local",
     "lint": "eslint",
     "test": "vitest",
     "test:run": "vitest run",

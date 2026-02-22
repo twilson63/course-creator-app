@@ -139,21 +139,14 @@ export function detectChanges(
  *
  * @param course - Current course definition
  * @param prompt - User's refinement prompt
- * @returns Refined course definition (or original on error)
+ * @returns Refined course definition
  */
 export async function refineCourse(
   course: CourseDefinition,
   prompt: string
 ): Promise<CourseDefinition> {
-  try {
-    const generator = createCourseGenerator();
-    const refined = await generator.refineCourse(course, prompt);
-    return refined;
-  } catch (error) {
-    console.error('Failed to refine course:', error);
-    // Return original on failure
-    return course;
-  }
+  const generator = createCourseGenerator();
+  return generator.refineCourse(course, prompt);
 }
 
 /**

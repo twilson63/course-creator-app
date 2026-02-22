@@ -68,6 +68,12 @@ export const JSON_TO_HTML_PROMPT = `You are a course HTML generator. Create a st
 Requirements:
 - Use Tailwind CSS classes (assume Tailwind is available)
 - Include a video player that syncs with step timestamps
+- IMPORTANT: YouTube/Vimeo/Loom/Descript URLs are NOT direct MP4 files. Do NOT use <video><source src="https://youtube...">.
+- For YouTube/Vimeo/Loom/Descript, use <iframe> embed URLs.
+- For YouTube, convert watch/share URLs into embed format: https://www.youtube.com/embed/{id}?start={seconds}
+- Prefer YouTube embeds on https://www.youtube-nocookie.com/embed/{id} and include iframe attributes: allowfullscreen, referrerpolicy="strict-origin-when-cross-origin", and allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share".
+- Always include a visible fallback link labeled "Watch on YouTube" pointing to https://www.youtube.com/watch?v={id}.
+- Only use <video> tag for direct media files (mp4/webm/ogg)
 - Create step-by-step navigation with checkboxes for completion
 - Track progress (store in localStorage)
 - Use clean, modern design with good typography

@@ -69,6 +69,18 @@ export interface CourseResource {
 }
 
 /**
+ * Published URL history entry
+ */
+export interface PublishHistoryEntry {
+  /** ZenBin published ID */
+  zenbin_id: string;
+  /** ZenBin published URL */
+  zenbin_url: string;
+  /** Publish timestamp */
+  published_at: string;
+}
+
+/**
  * Full course definition (source format)
  */
 export interface CourseDefinition {
@@ -146,12 +158,16 @@ export interface CourseRecord {
   transcript_key?: string;
   /** Course JSON (full CourseDefinition) */
   course_json?: CourseDefinition;
+  /** Legacy course definition key (backward compatibility) */
+  definition?: CourseDefinition;
   /** Generated HTML for publishing */
   generated_html?: string;
   /** ZenBin published ID */
   zenbin_id?: string;
   /** ZenBin published URL */
   zenbin_url?: string;
+  /** Publish history (new URL each publish) */
+  publish_history?: PublishHistoryEntry[];
   /** Course status */
   status: 'draft' | 'processing' | 'ready' | 'published';
   /** Created timestamp */

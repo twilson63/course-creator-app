@@ -37,9 +37,9 @@ export class ZenBinClient {
   /**
    * Create a new ZenBin client
    *
-   * @param baseUrl - ZenBin API base URL (default: https://zenbin.io)
+   * @param baseUrl - ZenBin API base URL (default: https://zenbin.org)
    */
-  constructor(baseUrl: string = 'https://zenbin.io') {
+  constructor(baseUrl: string = 'https://zenbin.org') {
     this.baseUrl = baseUrl.replace(/\/$/, '');
   }
 
@@ -59,19 +59,22 @@ export class ZenBinClient {
       const content = encodeHTML(html);
 
       try {
-        const response = await fetch(`${this.baseUrl}/api/bin`, {
+        const response = await fetch(`${this.baseUrl}/v1/pages/${encodeURIComponent(id)}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ id, content }),
+          body: JSON.stringify({
+            encoding: 'base64',
+            html: content,
+          }),
         });
 
-        if (response.ok) {
+        if (response.status === 201 || response.ok) {
           const data = await response.json();
           return {
             id: data.id || id,
-            url: `${this.baseUrl}/${data.id || id}`,
+            url: data.url || `${this.baseUrl}/p/${data.id || id}`,
           };
         }
 
@@ -86,7 +89,11 @@ export class ZenBinClient {
         throw new Error(`Publish failed: ${errorData.error || response.statusText}`);
       } catch (error) {
         if (error instanceof Error) {
-          lastError = error;
+          if (error.message === 'Failed to fetch') {
+            lastError = new Error(`Failed to reach ${this.baseUrl}. Check network access or NEXT_PUBLIC_ZENBIN_URL`);
+          } else {
+            lastError = error;
+          }
         }
         // Only retry on conflicts
         if (!lastError?.message.includes('conflict')) {
@@ -106,7 +113,7 @@ export class ZenBinClient {
    */
   async get(id: string): Promise<{ id: string; content: string } | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/bin/${id}`);
+      const response = await fetch(`${this.baseUrl}/p/${encodeURIComponent(id)}/raw`);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -115,10 +122,10 @@ export class ZenBinClient {
         throw new Error(`Failed to get content: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const content = await response.text();
       return {
-        id: data.id || id,
-        content: data.content,
+        id,
+        content,
       };
     } catch (error) {
       console.error('Failed to get ZenBin content:', error);
@@ -161,8 +168,10 @@ export function encodeHTML(html: string): string {
   return btoa(binary);
 }
 
+const DEFAULT_ZENBIN_BASE_URL = process.env.NEXT_PUBLIC_ZENBIN_URL || 'https://zenbin.org';
+
 // Default client instance
-const defaultClient = new ZenBinClient();
+const defaultClient = new ZenBinClient(DEFAULT_ZENBIN_BASE_URL);
 
 /**
  * Publish HTML content using the default client

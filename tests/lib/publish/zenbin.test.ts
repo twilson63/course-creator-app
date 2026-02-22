@@ -75,13 +75,13 @@ describe('ZenBin Publishing', () => {
       it('should publish HTML content', async () => {
         mockFetch.mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ id: 'abc123', url: 'https://zenbin.example.com/abc123' }),
+          json: async () => ({ id: 'abc123', url: 'https://zenbin.example.com/p/abc123' }),
         });
 
         const result = await client.publish(mockHTML);
 
         expect(mockFetch).toHaveBeenCalledWith(
-          'https://zenbin.example.com/api/bin',
+          expect.stringMatching(/^https:\/\/zenbin\.example\.com\/v1\/pages\//),
           expect.objectContaining({
             method: 'POST',
             headers: expect.objectContaining({
@@ -90,7 +90,7 @@ describe('ZenBin Publishing', () => {
           })
         );
         expect(result.id).toBe('abc123');
-        expect(result.url).toBe('https://zenbin.example.com/abc123');
+        expect(result.url).toBe('https://zenbin.example.com/p/abc123');
       });
 
       it('should send base64-encoded content', async () => {
@@ -104,9 +104,9 @@ describe('ZenBin Publishing', () => {
         const call = mockFetch.mock.calls[0];
         const body = JSON.parse(call[1].body);
 
-        // Body should have encoded content
-        expect(body.content).toBeDefined();
-        expect(typeof body.content).toBe('string');
+        expect(body.encoding).toBe('base64');
+        expect(body.html).toBeDefined();
+        expect(typeof body.html).toBe('string');
       });
 
       it('should retry on ID conflict', async () => {
@@ -155,13 +155,14 @@ describe('ZenBin Publishing', () => {
       it('should fetch published content', async () => {
         mockFetch.mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ content: encodeHTML(mockHTML), id: 'abc123' }),
+          text: async () => mockHTML,
         });
 
         const result = await client.get('abc123');
 
-        expect(mockFetch).toHaveBeenCalledWith('https://zenbin.example.com/api/bin/abc123');
+        expect(mockFetch).toHaveBeenCalledWith('https://zenbin.example.com/p/abc123/raw');
         expect(result.id).toBe('abc123');
+        expect(result.content).toBe(mockHTML);
       });
 
       it('should return null for not found', async () => {
@@ -181,12 +182,12 @@ describe('ZenBin Publishing', () => {
     it('should publish and return URL', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ id: 'abc123', url: 'https://zenbin.io/abc123' }),
+        json: async () => ({ id: 'abc123', url: 'https://zenbin.org/p/abc123' }),
       });
 
       const result = await publishCourse(mockHTML);
 
-      expect(result.url).toBe('https://zenbin.io/abc123');
+      expect(result.url).toBe('https://zenbin.org/p/abc123');
       expect(result.id).toBe('abc123');
     });
   });

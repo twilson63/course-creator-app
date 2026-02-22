@@ -1,13 +1,18 @@
 import type { NextConfig } from "next";
 
+const appSlug = process.env.NEXT_PUBLIC_ONHYPER_APP_SLUG || 'course-creator-4473b404';
+const useSubdomainBase =
+  process.env.ONHYPER_USE_SUBDOMAIN === 'true' ||
+  process.env.NEXT_PUBLIC_ONHYPER_USE_SUBDOMAIN === 'true';
+
 const nextConfig: NextConfig = {
   output: 'export',
   trailingSlash: true,
   images: {
     unoptimized: true,
   },
-  // Configure for OnHyper app path
-  basePath: '/a/course-creator-30c2a685',
+  // Path-based deploys use /a/{slug}, subdomain deploys use root
+  basePath: useSubdomainBase ? '' : `/a/${appSlug}`,
 };
 
 export default nextConfig;

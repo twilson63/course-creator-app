@@ -54,11 +54,14 @@ npm run build
 ```env
 # Optional: explicit app slug header for proxy calls.
 # If omitted, slug is derived from /a/{slug} URL at runtime.
-NEXT_PUBLIC_ONHYPER_APP_SLUG=course-creator-30c2a685
+NEXT_PUBLIC_ONHYPER_APP_SLUG=course-creator-4473b404
+
+# Use true when deploying to subdomain (*.onhyper.io) so assets resolve from root.
+NEXT_PUBLIC_ONHYPER_USE_SUBDOMAIN=true
 
 # Optional overrides for local direct APIs (defaults use /proxy/*).
-NEXT_PUBLIC_HYPER_MICRO_URL=/proxy/hyper-micro
-NEXT_PUBLIC_LLM_API_URL=/proxy/openai/v1
+NEXT_PUBLIC_HYPER_MICRO_URL=/proxy/hypermicro
+NEXT_PUBLIC_LLM_API_URL=/proxy/openrouter/v1
 
 # Optional direct API credentials (not needed when using /proxy/*)
 NEXT_PUBLIC_HYPER_MICRO_KEY=
@@ -69,11 +72,15 @@ NEXT_PUBLIC_LLM_MODEL=gpt-4
 NEXT_PUBLIC_LLM_MAX_RETRIES=3
 NEXT_PUBLIC_LLM_TIMEOUT=120000
 
+# Optional OpenRouter passthrough key for local proxy
+OPENROUTER_API_KEY=
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+
 # Publish destination
 NEXT_PUBLIC_ZENBIN_URL=https://zenbin.org
 
 # Local OnHyper emulation server settings
-ONHYPER_APP_SLUG=course-creator-30c2a685
+ONHYPER_APP_SLUG=course-creator-4473b404
 HYPER_MICRO_TARGET=http://localhost:6363
 HYPER_MICRO_API_KEY=
 
@@ -82,6 +89,9 @@ HYPER_MICRO_API_KEY=
 OPENAI_PROXY_MODE=mock
 OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_API_KEY=
+
+# OnHyper deployment auth
+ONHYPER_TOKEN=
 ```
 
 ## Local OnHyper Emulation
@@ -90,17 +100,31 @@ Use this to run static assets and emulate OnHyper proxy behavior locally.
 
 1. Build static output: `npm run build:static`
 2. Start local server: `npm run serve:local`
-3. Open `http://localhost:4173/a/course-creator-30c2a685`
+3. Open `http://localhost:4173/a/course-creator-4473b404`
 
 Supported local proxy routes:
 
+- `POST /proxy/openrouter/v1/chat/completions` (mocked response by default)
 - `POST /proxy/openai/v1/chat/completions` (mocked response by default)
-- `/proxy/hyper-micro/*` (forwarded to `HYPER_MICRO_TARGET`)
+- `/proxy/hypermicro/*` (and `/proxy/hyper-micro/*`) forwarded to `HYPER_MICRO_TARGET`
 
 To use real OpenAI in local proxy mode, set:
 
 - `OPENAI_PROXY_MODE=passthrough`
 - `OPENAI_API_KEY=<your_key>`
+
+To use real OpenRouter in local proxy mode, set:
+
+- `OPENAI_PROXY_MODE=passthrough`
+- `NEXT_PUBLIC_LLM_API_URL=/proxy/openrouter/v1`
+- `OPENROUTER_API_KEY=<your_key>`
+
+## OnHyper Publish (ZIP)
+
+Use deployment scripts with `ONHYPER_TOKEN`:
+
+1. Configure provider secrets: `npm run onhyper:configure`
+2. Build + zip upload + publish: `npm run onhyper:publish`
 
 The local proxy enforces `X-App-Slug` and checks it against `ONHYPER_APP_SLUG`.
 

@@ -10,12 +10,14 @@ const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, '..');
 const OUT_DIR = path.join(ROOT_DIR, 'out');
 const PORT = Number(process.env.PORT || 4173);
-const APP_SLUG = process.env.ONHYPER_APP_SLUG || 'course-creator-30c2a685';
+const APP_SLUG = process.env.ONHYPER_APP_SLUG || 'course-creator-4473b404';
 const HYPER_MICRO_TARGET = (process.env.HYPER_MICRO_TARGET || 'http://localhost:6363').replace(/\/$/, '');
 const HYPER_MICRO_API_KEY = process.env.HYPER_MICRO_API_KEY || '';
 const OPENAI_PROXY_MODE = process.env.OPENAI_PROXY_MODE || 'mock';
 const OPENAI_BASE_URL = (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, '');
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+const OPENROUTER_BASE_URL = (process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '');
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || OPENAI_API_KEY;
 
 const MIME_TYPES = {
   '.css': 'text/css; charset=utf-8',
@@ -102,7 +104,7 @@ function mockCourseJson() {
   };
 }
 
-async function handleOpenAiProxy(req, res) {
+async function handleOpenAiProxy(req, res, baseUrl = OPENAI_BASE_URL, apiKey = OPENAI_API_KEY) {
   if (!validateAppSlug(req, res)) {
     return;
   }
@@ -113,8 +115,8 @@ async function handleOpenAiProxy(req, res) {
   }
 
   if (OPENAI_PROXY_MODE === 'passthrough') {
-    if (!OPENAI_API_KEY) {
-      badRequest(res, 500, 'Missing OPENAI_API_KEY for passthrough mode');
+    if (!apiKey) {
+      badRequest(res, 500, 'Missing API key for passthrough mode');
       return;
     }
 
@@ -125,11 +127,11 @@ async function handleOpenAiProxy(req, res) {
       }
       const body = chunks.length > 0 ? Buffer.concat(chunks) : undefined;
 
-      const upstream = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
+      const upstream = await fetch(`${baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          Authorization: `Bearer ${apiKey}`,
           'Accept-Encoding': 'identity',
         },
         body,
@@ -190,7 +192,7 @@ async function handleHyperMicroProxy(req, res, pathname) {
     return;
   }
 
-  const upstreamPath = pathname.replace(/^\/proxy\/hyper-micro/, '') || '/';
+  const upstreamPath = pathname.replace(/^\/proxy\/(hyper-micro|hypermicro)/, '') || '/';
   const targetUrl = `${HYPER_MICRO_TARGET}${upstreamPath}${new URL(req.url, `http://${req.headers.host}`).search}`;
 
   try {
@@ -284,11 +286,16 @@ const server = createServer(async (req, res) => {
   const slugPrefix = `/a/${APP_SLUG}`;
 
   if (pathname === '/proxy/openai/v1/chat/completions') {
-    await handleOpenAiProxy(req, res);
+    await handleOpenAiProxy(req, res, OPENAI_BASE_URL, OPENAI_API_KEY);
     return;
   }
 
-  if (pathname.startsWith('/proxy/hyper-micro/')) {
+  if (pathname === '/proxy/openrouter/v1/chat/completions') {
+    await handleOpenAiProxy(req, res, OPENROUTER_BASE_URL, OPENROUTER_API_KEY);
+    return;
+  }
+
+  if (pathname.startsWith('/proxy/hyper-micro/') || pathname.startsWith('/proxy/hypermicro/')) {
     await handleHyperMicroProxy(req, res, pathname);
     return;
   }

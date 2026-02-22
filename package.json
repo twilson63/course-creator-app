@@ -10,6 +10,8 @@
     "serve:local": "node scripts/local-onhyper-server.mjs",
     "dev:onhyper-mock": "node scripts/local-onhyper-server.mjs",
     "dev:full": "npm run build:static && npm run serve:local",
+    "onhyper:configure": "bash scripts/onhyper-configure-secrets.sh",
+    "onhyper:publish": "bash scripts/onhyper-publish-zip.sh",
     "lint": "eslint",
     "test": "vitest",
     "test:run": "vitest run",

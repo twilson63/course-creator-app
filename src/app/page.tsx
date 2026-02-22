@@ -49,8 +49,8 @@ export default function Home() {
           <div className="flex items-center gap-4">
             {user ? (
               <>
-                <a href="/dashboard" className="text-gray-600 hover:text-gray-900">
-                  Dashboard
+                <a href="/courses" className="text-gray-600 hover:text-gray-900">
+                  Courses
                 </a>
                 <button
                   onClick={logout}
@@ -94,10 +94,10 @@ export default function Home() {
           <div className="flex items-center justify-center gap-4">
             {user ? (
               <a
-                href="/dashboard"
+                href="/courses"
                 className="px-8 py-3 bg-blue-600 text-white rounded-lg text-lg font-medium hover:bg-blue-700 transition-colors"
               >
-                Go to Dashboard
+                Go to Courses
               </a>
             ) : (
               <button

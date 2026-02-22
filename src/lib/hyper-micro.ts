@@ -9,7 +9,11 @@
  */
 
 import { ApiResponse, HyperDocument } from '@/types';
-import { isProxyBaseUrl, withOnHyperHeaders } from '@/lib/onhyper-proxy';
+import {
+  isProxyBaseUrl,
+  resolveOnHyperProxyBaseUrl,
+  withOnHyperHeaders,
+} from '@/lib/onhyper-proxy';
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -59,7 +63,7 @@ function normalizeListPayload<T>(payload: unknown): HyperDocument<T>[] {
 // Configuration
 // ============================================================================
 
-const HYPER_MICRO_URL = process.env.NEXT_PUBLIC_HYPER_MICRO_URL || '/proxy/hyper-micro';
+const HYPER_MICRO_URL = process.env.NEXT_PUBLIC_HYPER_MICRO_URL || '/proxy/hypermicro';
 const HYPER_MICRO_KEY = process.env.NEXT_PUBLIC_HYPER_MICRO_KEY || '';
 
 if (!HYPER_MICRO_URL || !HYPER_MICRO_KEY) {
@@ -83,17 +87,18 @@ async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
-  const url = `${HYPER_MICRO_URL}${path}`;
+  const baseUrl = resolveOnHyperProxyBaseUrl(HYPER_MICRO_URL);
+  const url = `${baseUrl}${path}`;
 
   try {
     const headers = withOnHyperHeaders(
       {
         'Content-Type': 'application/json',
       },
-      HYPER_MICRO_URL
+      baseUrl
     );
 
-    if (HYPER_MICRO_KEY && !isProxyBaseUrl(HYPER_MICRO_URL)) {
+    if (HYPER_MICRO_KEY && !isProxyBaseUrl(baseUrl)) {
       headers.Authorization = `Bearer ${HYPER_MICRO_KEY}`;
     }
 
@@ -342,17 +347,18 @@ export const storageApi = {
     content: string | ArrayBuffer,
     contentType: string = 'text/plain'
   ): Promise<ApiResponse<void>> {
-    const url = `${HYPER_MICRO_URL}/api/storage/${bucket}/${encodeURIComponent(key)}`;
+    const baseUrl = resolveOnHyperProxyBaseUrl(HYPER_MICRO_URL);
+    const url = `${baseUrl}/api/storage/${bucket}/${encodeURIComponent(key)}`;
 
     try {
       const headers = withOnHyperHeaders(
         {
           'Content-Type': contentType,
         },
-        HYPER_MICRO_URL
+        baseUrl
       );
 
-      if (HYPER_MICRO_KEY && !isProxyBaseUrl(HYPER_MICRO_URL)) {
+      if (HYPER_MICRO_KEY && !isProxyBaseUrl(baseUrl)) {
         headers.Authorization = `Bearer ${HYPER_MICRO_KEY}`;
       }
 
@@ -389,11 +395,12 @@ export const storageApi = {
    * @returns File content
    */
   async download(bucket: string, key: string): Promise<ApiResponse<string | ArrayBuffer>> {
-    const url = `${HYPER_MICRO_URL}/api/storage/${bucket}/${encodeURIComponent(key)}`;
+    const baseUrl = resolveOnHyperProxyBaseUrl(HYPER_MICRO_URL);
+    const url = `${baseUrl}/api/storage/${bucket}/${encodeURIComponent(key)}`;
 
     try {
-      const headers = withOnHyperHeaders({}, HYPER_MICRO_URL);
-      if (HYPER_MICRO_KEY && !isProxyBaseUrl(HYPER_MICRO_URL)) {
+      const headers = withOnHyperHeaders({}, baseUrl);
+      if (HYPER_MICRO_KEY && !isProxyBaseUrl(baseUrl)) {
         headers.Authorization = `Bearer ${HYPER_MICRO_KEY}`;
       }
 

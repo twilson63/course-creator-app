@@ -45,10 +45,10 @@ function ErrorDisplay({ error }: { error: string }) {
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Course Not Found</h1>
         <p className="text-gray-600 mb-4">{error}</p>
         <a
-          href="/dashboard"
+          href="/courses"
           className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
-          Back to Dashboard
+          Back to Courses
         </a>
       </div>
     </div>
@@ -199,11 +199,11 @@ function EditContent() {
     <div className="h-screen relative">
       <div className="absolute top-4 right-4 z-10">
         <Link
-          href="/dashboard"
+          href="/courses"
           className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50"
         >
           <span aria-hidden="true">&larr;</span>
-          Back to Dashboard
+          Back to Courses
         </Link>
       </div>
       <EditStudio

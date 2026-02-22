@@ -19,6 +19,8 @@ Guidance for coding agents operating in this repository.
 - Start production server: `npm run start`
 - Serve static bundle with local OnHyper proxy emulation: `npm run serve:local`
 - Build + serve static bundle locally: `npm run dev:full`
+- Configure OnHyper secrets via token: `npm run onhyper:configure`
+- Publish static ZIP to OnHyper: `npm run onhyper:publish`
 - Run lint: `npm run lint`
 - Run tests in watch mode: `npm test`
 - Run tests once (CI style): `npm run test:run`
@@ -113,7 +115,7 @@ Guidance for coding agents operating in this repository.
 ### Data/API Patterns
 
 - Centralize HTTP interactions in `src/lib/*` clients/services.
-- Prefer OnHyper-style proxy endpoints (`/proxy/openai/*`, `/proxy/hyper-micro/*`) over exposing provider keys in browser code.
+- Prefer OnHyper-style proxy endpoints (`/proxy/openrouter/*`, `/proxy/openai/*`, `/proxy/hypermicro/*`) over exposing provider keys in browser code.
 - Include `X-App-Slug` for proxy calls; derive from `/a/{slug}` when possible instead of hardcoding.
 - Keep request/response typing explicit (`ApiResponse<T>`, domain records).
 - Validate external/LLM output before use (`validateCourseDefinition` pattern).

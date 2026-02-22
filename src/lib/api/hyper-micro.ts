@@ -7,20 +7,15 @@
  */
 
 const API_KEY = process.env.NEXT_PUBLIC_HYPER_MICRO_KEY || '';
-const BASE_URL = process.env.NEXT_PUBLIC_HYPER_MICRO_URL || '/proxy/hyper-micro';
+const BASE_URL = process.env.NEXT_PUBLIC_HYPER_MICRO_URL || '/proxy/hypermicro';
 
 function isProxyBaseUrl(baseUrl: string): boolean {
   return baseUrl.startsWith('/proxy/');
 }
 
 function resolveOnHyperAppSlug(): string | undefined {
-  const configuredSlug = process.env.NEXT_PUBLIC_ONHYPER_APP_SLUG;
-  if (configuredSlug) {
-    return configuredSlug;
-  }
-
   if (typeof window === 'undefined') {
-    return undefined;
+    return process.env.NEXT_PUBLIC_ONHYPER_APP_SLUG;
   }
 
   const pathMatch = window.location.pathname.match(/\/a\/([^/]+)/);
@@ -31,6 +26,11 @@ function resolveOnHyperAppSlug(): string | undefined {
   const host = window.location.hostname;
   if (host.endsWith('.onhyper.io') && host !== 'onhyper.io') {
     return host.replace(/\.onhyper\.io$/, '');
+  }
+
+  const configuredSlug = process.env.NEXT_PUBLIC_ONHYPER_APP_SLUG;
+  if (configuredSlug) {
+    return configuredSlug;
   }
 
   return undefined;

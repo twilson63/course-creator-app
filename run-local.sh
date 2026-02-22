@@ -5,7 +5,7 @@ set -euo pipefail
 # 1) Copy this file and fill values below, OR
 # 2) export these vars in your shell before running.
 
-export ONHYPER_APP_SLUG="${ONHYPER_APP_SLUG:-course-creator-30c2a685}"
+export ONHYPER_APP_SLUG="${ONHYPER_APP_SLUG:-course-creator-4473b404}"
 export HYPER_MICRO_TARGET="${HYPER_MICRO_TARGET:-https://desirable-beauty-production-d4d8.up.railway.app}"
 export HYPER_MICRO_API_KEY="${HYPER_MICRO_API_KEY:-}"
 

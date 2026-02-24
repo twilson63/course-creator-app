@@ -6,7 +6,6 @@ const useSubdomainBase =
   process.env.NEXT_PUBLIC_ONHYPER_USE_SUBDOMAIN === 'true';
 
 const nextConfig: NextConfig = {
-  output: 'export',
   trailingSlash: true,
   images: {
     unoptimized: true,
